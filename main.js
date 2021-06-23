@@ -177,7 +177,7 @@ $(document).ready(() => {
     //let _rc = win;//winW <= 500 ? 6 : (winW > 500 && winW <= 1024 ? 14 : (winW > 1024 && winW <= 1200 ? 18 : 27));
     let defaultRows = grid.r;//_rc;
     let defaultColumns = grid.c;//_rc;
-    let default0Char = ' '//'🌊';
+    let default0Char = '&nbsp;'//'🌊';
     let default1Char = 'x'//'🏝️';
 
     let btnChangeStatus = (btn, enable) => {
