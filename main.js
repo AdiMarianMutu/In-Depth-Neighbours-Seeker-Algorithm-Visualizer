@@ -6,61 +6,62 @@ class IslandRemover {
     // It took me ~5 hours to come with this solution
     // You can find different version of this challenge online, just search "cell grid count or linked cells" and so on
 
-    // The searching delay
-    SPEED_DELAY;
-
-    // The input matrix
-    #matrix;
-    #mRows;
-    #mColumns;
-    // This array of objects will contains the coordinates of the 1 which will not be removed from the final matrix
-    #partOfLinkedCells; // = [ { r: ROW, c: COLUMN } ];
-    #cellAlreadyVisited;
-    // The processed matrix
-    // Will be initialized with 0 values
-    #mProcessed;
+    constructor() {
+        // The searching delay
+        this.SPEED_DELAY;
+        // The input matrix
+        this.matrix;
+        this.mRows;
+        this.mColumns;
+        // This array of objects will contains the coordinates of the 1 which will not be removed from the final matrix
+        this.partOfLinkedCells;
+        this.cellAlreadyVisited;
+        // The processed matrix
+        // Will be initialized with 0 values
+        this.mProcessed;
+    }
 
 
     async #sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
     #_init(m, speed) {
         this.SPEED_DELAY = speed / 50;
-        this.#matrix = m;
-        this.#mRows = m.length;
-        this.#mColumns = m[0].length;
-        this.#partOfLinkedCells = [];
-        this.#cellAlreadyVisited = [];
-        this.#mProcessed = [...Array(this.#mRows)].map(e => Array(this.#mColumns).fill(0));
+        this.matrix = m;
+        this.mRows = m.length;
+        this.mColumns = m[0].length;
+        this.partOfLinkedCells = [];
+        this.cellAlreadyVisited = [];
+        this.mProcessed = [...Array(this.mRows)].map(e => Array(this.mColumns).fill(0));
     }
     static isBorder(r, rMax, c, cMax) { return (r == 0 || r == rMax - 1) || (c == 0 || c == cMax - 1); }
-    #isOne(n) { return n == 1; }
-    #isOutsideMatrix(r, c) { return (r < 0 || r > this.#mRows - 1) || (r < 0 && (c < 0 || c > this.#mColumns - 1)); }
-    #coordExists(dictionary, r, c) { return dictionary === undefined ? false : dictionary.some(e => e.r === r && e.c === c); }
-    #addToPartOfLinkedCells(r, c) {
-        if (this.#coordExists(this.#partOfLinkedCells, r, c))
+    isOne(n) { return n == 1; }
+    isOutsideMatrix(r, c) { return (r < 0 || r > this.mRows - 1) || (r < 0 && (c < 0 || c > this.mColumns - 1)); }
+    coordExists(dictionary, r, c) { return dictionary === undefined ? false : dictionary.some(e => e.r === r && e.c === c); }
+    addToPartOfLinkedCells(r, c) {
+        if (this.coordExists(this.partOfLinkedCells, r, c))
             return;
         
-        this.#partOfLinkedCells.push(
+        this.partOfLinkedCells.push(
             {
                 r: r, // row
                 c: c  // column
             }
         );
         // Replaces the 0 with the right cell which will be part of an archipelago
-        this.#mProcessed[r][c] = 1;
+        this.mProcessed[r][c] = 1;
     }
     // Used for recursion
     // Called when a 1 is found
-    async #_keepLooking(r, c) {
+    async _keepLooking(r, c) {
         /* VISUALIZER STUFF - NOT REQUIRED */
         await this.#sleep(this.SPEED_DELAY);
         // Marks the filtered cell
         drawCellClass(r, c, 'part-of-linked-cells');
         /* END VISUALIZER STUFF - NOT REQUIRED */
 
-        this.#addToPartOfLinkedCells(r, c);
-        await this.#checkForNeighbors(r, c);
+        this.addToPartOfLinkedCells(r, c);
+        await this.checkForNeighbors(r, c);
     }
-    async #checkForNeighbors(r, c) {
+    async checkForNeighbors(r, c) {
         let dirs = [
             {r: r - 1, c: c}, // up
             {r: r + 1, c: c}, // down
@@ -70,10 +71,10 @@ class IslandRemover {
         
         for (let d = 0; d < 4; d++) {
             // If a cell was alredy marked as visited, it's pointless to recalculate everything
-            if (this.#coordExists(this.#cellAlreadyVisited, dirs[d].r, dirs[d].c))
+            if (this.coordExists(this.cellAlreadyVisited, dirs[d].r, dirs[d].c))
                 continue;
             else
-                this.#cellAlreadyVisited.push({ r:  dirs[d].r, c: dirs[d].c});
+                this.cellAlreadyVisited.push({ r:  dirs[d].r, c: dirs[d].c});
 
             /* VISUALIZER STUFF - NOT REQUIRED */
             drawCellClass(dirs[d].r, dirs[d].c, 'propagation');
@@ -83,25 +84,25 @@ class IslandRemover {
             }, this.SPEED_DELAY + 350);
             /* END VISUALIZER STUFF - NOT REQUIRED */
 
-            if (this.#coordExists(this.#partOfLinkedCells, dirs[d].r, dirs[d].c))
+            if (this.coordExists(this.partOfLinkedCells, dirs[d].r, dirs[d].c))
                 continue;
     
-            if (!this.#isOutsideMatrix(dirs[d].r, dirs[d].c) && this.#isOne(this.#matrix[dirs[d].r][dirs[d].c]))
-                await this.#_keepLooking(dirs[d].r, dirs[d].c);
+            if (!this.isOutsideMatrix(dirs[d].r, dirs[d].c) && this.isOne(this.matrix[dirs[d].r][dirs[d].c]))
+                await this._keepLooking(dirs[d].r, dirs[d].c);
         }
     };
 
     async run(matrix, speed = 500) {
         this.#_init(matrix, speed);
 
-        for (let r = 0; r < this.#mRows; r++) {
-            for (let c = 0; c < this.#mColumns; c++) {
-                if (IslandRemover.isBorder(r, this.#mRows, c, this.#mColumns) && this.#isOne(this.#matrix[r][c]))
-                    await this.#_keepLooking(r, c);
+        for (let r = 0; r < this.mRows; r++) {
+            for (let c = 0; c < this.mColumns; c++) {
+                if (IslandRemover.isBorder(r, this.mRows, c, this.mColumns) && this.isOne(this.matrix[r][c]))
+                    await this._keepLooking(r, c);
             }
         }
 
-        return this.#mProcessed;
+        return this.mProcessed;
     }
 }
 
