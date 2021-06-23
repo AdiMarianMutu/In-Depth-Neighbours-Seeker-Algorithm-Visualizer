@@ -1,4 +1,4 @@
-# In Depth Neighbours Seeker Algorithm Visualizer
+# In Depth Neighbors Seeker Algorithm Visualizer
 Visualizer of what I'm calling **In Depth Neighbors Seeker** Algorithm 😅
 
 ### Why?
