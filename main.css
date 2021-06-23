@@ -1,0 +1,68 @@
+body {
+    background-color: #191919 !important;
+    color: white !important;
+}
+
+/* GENERAL */
+.btn { 
+    margin: 5px;
+    min-width: 260px;
+    text-transform: uppercase;
+}
+
+/* TABLE RELATED */
+table {
+    margin-top: 16px;
+    margin-bottom: 25px;
+    user-select: none;
+    border-collapse: collapse;
+    border-radius: 30px;
+    border-style: hidden;
+    background-color: #00000021;
+
+    overflow: hidden;
+}
+td {
+    padding: 0.1rem 1.3rem;
+    /*border: 1px solid black !important;*/
+    border-collapse: collapse;
+    background-clip: padding-box;
+
+    transition: background-color 1s linear;
+}
+.part-of-linked-cells {
+    color: black;
+    background-color: #d5ff52 !important;
+}
+.propagation {
+    background-color: white;
+}
+.visited {
+    background-color: #a9ff0008;
+}
+.border-cell {
+    background-color: #00a1ff40;
+}
+
+/* CONTROLS */
+.speed-container {
+    margin-top: 8px;
+    min-width: 245px;
+}
+.speed-container > label {
+    width: 100%;
+    text-align: center;
+    user-select: none;
+}
+
+/* VERSION AND OTHER */
+.v {
+    position: fixed;
+    bottom: 4px;
+    right: 12px;
+}
+
+a:link { color: white; }
+a:visited { color: white; }
+a:hover { color: #d5ff52 !important; }
+a:active { color: #d4ff529f !important; }
