@@ -22,8 +22,8 @@ class IslandRemover {
     }
 
 
-    async #sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
-    #_init(m, speed) {
+    async sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
+    _init(m, speed) {
         this.SPEED_DELAY = speed / 50;
         this.matrix = m;
         this.mRows = m.length;
@@ -53,7 +53,7 @@ class IslandRemover {
     // Called when a 1 is found
     async _keepLooking(r, c) {
         /* VISUALIZER STUFF - NOT REQUIRED */
-        await this.#sleep(this.SPEED_DELAY);
+        await this.sleep(this.SPEED_DELAY);
         // Marks the filtered cell
         drawCellClass(r, c, 'part-of-linked-cells');
         /* END VISUALIZER STUFF - NOT REQUIRED */
@@ -93,7 +93,7 @@ class IslandRemover {
     };
 
     async run(matrix, speed = 500) {
-        this.#_init(matrix, speed);
+        this._init(matrix, speed);
 
         for (let r = 0; r < this.mRows; r++) {
             for (let c = 0; c < this.mColumns; c++) {
