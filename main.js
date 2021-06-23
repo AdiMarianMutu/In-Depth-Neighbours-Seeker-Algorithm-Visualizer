@@ -1,4 +1,4 @@
-class IslandRemover {
+class LinkedCells {
     // The algorithm is slowed down with sleep by purpose to better show the visualizer
     // I don't really know what kinda of algorithm I've written, I don't have much experience with algorithms
     // So i'm just gonna call it In Depth Neighbors Seeker
@@ -109,7 +109,7 @@ class IslandRemover {
 
         for (let r = 0; r < this.mRows; r++) {
             for (let c = 0; c < this.mColumns; c++) {
-                if (IslandRemover.isBorder(r, this.mRows, c, this.mColumns) && this.isOne(this.matrix[r][c]))
+                if (LinkedCells.isBorder(r, this.mRows, c, this.mColumns) && this.isOne(this.matrix[r][c]))
                     await this._keepLooking(r, c);
             }
         }
@@ -146,7 +146,7 @@ let drawMatrix = (m, empty = 0, island = 1) => {
 
         for (let c = 0; c < columns; c++) {
             let v = m[r][c] == 0 ? empty : island;
-            _r.append(`<td${IslandRemover.isBorder(r, m.length, c, m[0].length) && m[r][c] == 1 ? ` class="border-cell"` : ''}>${v}</td>`);
+            _r.append(`<td${LinkedCells.isBorder(r, m.length, c, m[0].length) && m[r][c] == 1 ? ` class="border-cell"` : ''}>${v}</td>`);
         }
     }
 }
@@ -172,13 +172,12 @@ $(document).ready(() => {
         input = cl;
     });
 
-
-    let winW = $(window).width();
+    let grid = { r: Math.round($(window).height() / 45), c: Math.round($(window).width() / 60) };
     let defaultSpeed = 500;
-    let _rc = winW <= 500 ? 6 : (winW > 500 && winW <= 1024 ? 14 : (winW > 1024 && winW <= 1200 ? 18 : 27));
-    let defaultRows = _rc;
-    let defaultColumns = _rc;
-    let default0Char = ''//'🌊';
+    //let _rc = win;//winW <= 500 ? 6 : (winW > 500 && winW <= 1024 ? 14 : (winW > 1024 && winW <= 1200 ? 18 : 27));
+    let defaultRows = grid.r;//_rc;
+    let defaultColumns = grid.c;//_rc;
+    let default0Char = ' '//'🌊';
     let default1Char = 'x'//'🏝️';
 
     let btnChangeStatus = (btn, enable) => {
@@ -224,7 +223,7 @@ $(document).ready(() => {
     
     $('#search-speed').val(defaultSpeed);
 
-    let ir = new IslandRemover();
+    let ir = new LinkedCells();
     let input;
     updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
 });
