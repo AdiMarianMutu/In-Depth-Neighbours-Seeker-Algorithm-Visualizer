@@ -21,11 +21,18 @@
     <body>
         <div id="visualizer-container" class="d-flex justify-content-center align-items-center flex-column">
             <div class="container d-flex justify-content-center align-items-center flex-column">
-                <button id="remove-cells-btn" type="button" class="btn btn-success">Show only connected cells</button>
-                <button id="random-matrix-btn" type="button" class="btn btn-primary">Generate new matrix</button>
-                <div class="speed-container">
-                    <label for="search-speed" class="form-label">Speed: 500ms</label>
-                    <input id="search-speed" type="range" class="form-range" min="100" max="2500" step="100" oninput="this.previousElementSibling.textContent = `Speed: ${this.value}ms`;">
+                <button id="random-matrix-btn" type="button" class="btn btn-primary btn-sm">Generate new matrix</button>
+                <button id="clear-matrix-btn" type="button" class="btn btn-secondary btn-sm" disabled>Reset current matrix</button>
+                <button id="remove-cells-btn" type="button" class="btn btn-success btn-sm">Show only connected cells</button>
+                <div class="container d-flex justify-content-center align-items-center flex-column mt-1">
+                    <div class="diagonal-search-container">
+                        <input id="enable-diagonal-search" class="form-check-input" type="checkbox" value="">
+                        <label class="form-check-label" for="enable-diagonal-search">Enable Diagonal Search</label>
+                    </div>
+                    <div class="speed-container">
+                        <label for="search-speed" class="form-label">Speed: 500ms</label>
+                        <input id="search-speed" type="range" class="form-range" min="100" max="2500" step="100" oninput="this.previousElementSibling.textContent = `Speed: ${this.value}ms`;">
+                    </div>
                 </div>
             </div>
             <div class="container d-flex justify-content-center align-items-center flex-column">
@@ -33,7 +40,7 @@
             </div>
         </div>
         <div class="v">
-            <span style="font-size: 0.7rem">Created by <a href="https://www.linkedin.com/in/mutu-adi-marian/" target="_blank">Adi-Marian Mutu</a> <span style="font-size: 0.6rem">v1.1</span></span>
+            <span style="font-size: 0.7rem">Created by <a href="https://www.linkedin.com/in/mutu-adi-marian/" target="_blank">Adi-Marian Mutu</a> <span style="font-size: 0.6rem">v1.1.2</span></span>
         </div>
     </body>
 </html>

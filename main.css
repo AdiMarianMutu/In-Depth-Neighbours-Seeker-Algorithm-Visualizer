@@ -45,6 +45,10 @@ td {
 }
 
 /* CONTROLS */
+.form-label { margin-bottom: 0 !important; }
+.diagonal-search-container {
+    user-select: none;
+}
 .speed-container {
     margin-top: 8px;
     min-width: 245px;

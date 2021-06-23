@@ -9,6 +9,8 @@ class IslandRemover {
     constructor() {
         // The searching delay
         this.SPEED_DELAY;
+        // Enables also diagonal search (the original challenge didn't require this, but it is a small easy upgrade)
+        this.DIAGONAL_SEARCH;
         // The input matrix
         this.matrix;
         this.mRows;
@@ -23,8 +25,9 @@ class IslandRemover {
 
 
     async sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
-    _init(m, speed) {
+    _init(m, speed, diagonalSearch) {
         this.SPEED_DELAY = speed / 50;
+        this.DIAGONAL_SEARCH = diagonalSearch;
         this.matrix = m;
         this.mRows = m.length;
         this.mColumns = m[0].length;
@@ -68,8 +71,17 @@ class IslandRemover {
             {r: r, c: c + 1}, // right
             {r: r, c: c - 1} // left
         ];
-        
-        for (let d = 0; d < 4; d++) {
+        if (this.DIAGONAL_SEARCH) {
+            dirs.push(
+                {r: r - 1, c: c + 1}, // up-right
+                {r: r - 1, c: c - 1}, // up-left
+                {r: r + 1, c: c + 1}, // down-right
+                {r: r + 1, c: c - 1} // down-left
+            );
+        }
+        let dirsLen = dirs.length;
+
+        for (let d = 0; d < dirsLen; d++) {
             // If a cell was alredy marked as visited, it's pointless to recalculate everything
             if (this.coordExists(this.cellAlreadyVisited, dirs[d].r, dirs[d].c))
                 continue;
@@ -92,8 +104,8 @@ class IslandRemover {
         }
     };
 
-    async run(matrix, speed = 500) {
-        this._init(matrix, speed);
+    async run(matrix, speed = 500, diagonalSearch = false) {
+        this._init(matrix, speed, diagonalSearch);
 
         for (let r = 0; r < this.mRows; r++) {
             for (let c = 0; c < this.mColumns; c++) {
@@ -169,24 +181,50 @@ $(document).ready(() => {
     let default0Char = ''//'🌊';
     let default1Char = 'x'//'🏝️';
 
-    $('#remove-cells-btn').on('click', async function() {
-        $(this).attr('disabled', true);
-        $('#random-matrix-btn').attr('disabled', true);
-        await ir.run(input, parseInt($('#search-speed').val()));
-        $('#random-matrix-btn').removeAttr('disabled');
-    });
-    $('#random-matrix-btn').on('click', function() {
-        let btn = $(this);
+    let btnChangeStatus = (btn, enable) => {
+        let b = $(btn);
+        if (enable)
+            b.removeAttr('disabled');
+        else
+            b.attr('disabled', true);
+    };
 
-        $('#remove-cells-btn').removeAttr('disabled');
-        btn.attr('disabled', true);
-        input = generateRandomMatrix(defaultRows, defaultColumns);
+    let updateMatrix = (_input) => {
+        input = _input;
         drawMatrix(input, default0Char, default1Char);
-        btn.removeAttr('disabled');
+    }
+
+    $('#random-matrix-btn').on('click', function() {
+        btnChangeStatus('#random-matrix-btn', false);
+        btnChangeStatus('#clear-matrix-btn', false);
+        btnChangeStatus('#remove-cells-btn', true);
+
+        updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
+
+        btnChangeStatus('#random-matrix-btn', true);
     });
+    $('#clear-matrix-btn').on('click', () => {
+        btnChangeStatus('#remove-cells-btn', true);
+        
+        updateMatrix(input);
+
+        btnChangeStatus('#clear-matrix-btn', false);
+    });
+    $('#remove-cells-btn').on('click', async function() {
+        btnChangeStatus('#remove-cells-btn', false);
+        btnChangeStatus('#random-matrix-btn', false);
+        btnChangeStatus('#enable-diagonal-search', false);
+        
+        await ir.run(input, parseInt($('#search-speed').val()), $('#enable-diagonal-search').prop('checked'));
+
+        btnChangeStatus('#clear-matrix-btn', true);
+        btnChangeStatus('#random-matrix-btn', true);
+        btnChangeStatus('#enable-diagonal-search', true);
+    });
+    
     $('#search-speed').val(defaultSpeed);
 
     let ir = new IslandRemover();
-    let input = generateRandomMatrix(defaultRows, defaultColumns);
-    drawMatrix(input, default0Char, default1Char);
+    let input;
+    updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
 });
