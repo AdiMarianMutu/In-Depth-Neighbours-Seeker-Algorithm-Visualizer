@@ -167,9 +167,7 @@ $(document).ready(() => {
     $(document).on('keypress', function(e) {
         $('#remove-cells-btn').removeAttr('disabled');
 
-        let cl = [[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]];
-        drawMatrix(cl, default0Char, default1Char);
-        input = cl;
+        updateMatrix([[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]]);
     });
 
     let grid = { r: Math.round($(window).height() / 45), c: Math.round($(window).width() / 60) };
