@@ -7,7 +7,7 @@ I don't have any experience with algorithms, so maybe I've just recreated someth
 
 #### Challenge
 The challenge is pretty simple, there is a matrix filled with 0 and 1, our goal is to retrieve only the 1 which are **vertically** or **orizontally** connected, but the connection **must start from a border**. Then just remove the 1 which are not connected.<br>
-(*Even if the algorithms returns the matrix correctly, I've decided to leave the unlinked islands in order to better see the action behind the scenes*)
+(*Even if behind the scenes the algorithms correctly returns the matrix, I've decided to leave the unlinked cells in order to better visualize the matrix*)
 
 This
 ```
