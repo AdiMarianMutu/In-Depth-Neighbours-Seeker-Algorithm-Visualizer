@@ -9,7 +9,6 @@ class IslandRemover {
     // The searching delay
     SPEED_DELAY;
 
-    forceStop = false;
     // The input matrix
     #matrix;
     #mRows;
@@ -149,6 +148,18 @@ let drawCellClass = (row, column, _class) => {
 }
 
 $(document).ready(() => {
+    // The original input array from Clément Mihailescu video
+    // (https://www.youtube.com/watch?v=4tYoVx0QoN0)
+    // Press any key to load
+    $(document).on('keypress', function(e) {
+        $('#remove-cells-btn').removeAttr('disabled');
+
+        let cl = [[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]];
+        drawMatrix(cl, default0Char, default1Char);
+        input = cl;
+    });
+
+
     let winW = $(window).width();
     let defaultSpeed = 500;
     let _rc = winW <= 500 ? 6 : (winW > 500 && winW <= 1024 ? 14 : (winW > 1024 && winW <= 1200 ? 18 : 27));
