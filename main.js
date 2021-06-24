@@ -7,6 +7,7 @@ class LinkedCells {
     // You can find different version of this challenge online, just search "cell grid count or linked cells" and so on
 
     constructor() {
+        this.ABORT = false;
         // The searching delay
         this.SPEED_DELAY;
         // Enables also diagonal search (the original challenge didn't require this, but it is a small easy upgrade)
@@ -22,7 +23,6 @@ class LinkedCells {
         // Will be initialized with 0 values
         this.mProcessed;
     }
-
 
     async sleep(ms) { return new Promise((resolve) => { setTimeout(resolve, ms); }); }
     _init(m, speed, diagonalSearch) {
@@ -43,29 +43,30 @@ class LinkedCells {
         if (this.coordExists(this.partOfLinkedCells, r, c))
             return;
         
-        this.partOfLinkedCells.push(
-            {
-                r: r, // row
-                c: c  // column
-            }
-        );
+        this.partOfLinkedCells.push({ r: r, c: c });
         // Replaces the 0 with the right cell which will be part of an archipelago
         this.mProcessed[r][c] = 1;
     }
     // Used for recursion
     // Called when a 1 is found
     async _keepLooking(r, c, propagationCallback, linkedCellCallback) {
-        /* VISUALIZER STUFF - NOT REQUIRED */
+        if (this.ABORT)
+            return;
+
+        /* VISUALIZER STUFF - NOT MANDATORY */
         if (this.SPEED_DELAY > 0)
             await this.sleep(this.SPEED_DELAY);
         // Marks the filtered cell
         linkedCellCallback(r, c);
-        /* END VISUALIZER STUFF - NOT REQUIRED */
+        /* END VISUALIZER STUFF - NOT MANDATORY */
 
         this.addToPartOfLinkedCells(r, c);
         await this.checkForNeighbors(r, c, propagationCallback, linkedCellCallback);
     }
     async checkForNeighbors(r, c, propagationCallback, linkedCellCallback) {
+        if (this.ABORT)
+            return;
+
         const dirs = [
             {r: r - 1, c: c}, // up
             {r: r + 1, c: c}, // down
@@ -89,13 +90,13 @@ class LinkedCells {
             else
                 this.cellAlreadyVisited.push({ r:  dirs[d].r, c: dirs[d].c});
 
-            /* VISUALIZER STUFF - NOT REQUIRED */
-            propagationCallback(dirs[d].r, dirs[d].c, this.SPEED_DELAY);
-            /* END VISUALIZER STUFF - NOT REQUIRED */
-
             if (this.coordExists(this.partOfLinkedCells, dirs[d].r, dirs[d].c))
                 continue;
-    
+
+            /* VISUALIZER STUFF - NOT MANDATORY */
+            propagationCallback(dirs[d].r, dirs[d].c, this.SPEED_DELAY);
+            /* END VISUALIZER STUFF - NOT MANDATORY */
+
             if (!this.isOutsideMatrix(dirs[d].r, dirs[d].c) && this.isOne(this.matrix[dirs[d].r][dirs[d].c]))
                 await this._keepLooking(dirs[d].r, dirs[d].c, propagationCallback, linkedCellCallback);
         }
@@ -105,7 +106,13 @@ class LinkedCells {
         this._init(matrix, speed, diagonalSearch);
 
         for (let r = 0; r < this.mRows; r++) {
+            if (this.ABORT)
+                return;
+
             for (let c = 0; c < this.mColumns; c++) {
+                if (this.ABORT)
+                    return;
+
                 if (LinkedCells.isBorder(r, this.mRows, c, this.mColumns) && this.isOne(this.matrix[r][c]))
                     await this._keepLooking(r, c, propagationCallback, linkedCellCallback);
             }
@@ -129,8 +136,6 @@ const matrixRandomGenerate = (rows, columns) => {
 
     return result;
 }
-
-
 const matrixDraw = (m, empty = 0, island = 1) => {
     const table = $('table');
         table.html(''); // Resets the table structure
@@ -172,30 +177,76 @@ const matrixDrawLinkedCell = (r, c) => {
     matrixCellClass(r, c, 'part-of-linked-cells');
 }
 
+
 $(document).ready(() => {
     // The original input array from Clément Mihailescu video
     // (https://www.youtube.com/watch?v=4tYoVx0QoN0)
     // Press any key to load
     $(document).on('keypress', function(e) {
-        $('#remove-cells-btn').removeAttr('disabled');
+        $('#highlight-cells-btn').removeAttr('disabled');
 
         updateMatrix([[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]]);
     });
 
     const grid = { r: Math.round((window.innerHeight - 235) / 28), c: Math.round(window.innerWidth / 11) };
-    const defaultSpeed = 500;
+    const defaultSpeed = 4;
     const defaultRows = grid.r;
     const defaultColumns = grid.c;
     const default0Char = '&nbsp;';
     const default1Char = 'x';
 
-    const btnChangeStatus = (btn, enable) => {
-        let b = $(btn);
-        if (enable)
-            b.removeAttr('disabled');
-        else
-            b.attr('disabled', true);
+    const btnStatus = (btns) => {
+        btns.forEach((b) => {
+            const a = b.act.str;
+            const v = b.act.val;
+            const s = b.sel;
+
+            if (a == 'enable')
+                switch (v) {
+                    case true: $(s).removeAttr('disabled'); break;
+                    case false: $(s).attr('disabled', true); break;
+                }
+            else if (a == 'display')
+                switch (v) {
+                    case true: $(s).removeClass('d-none'); break;
+                    case false: $(s).addClass('d-none'); break;
+                }
+        });
     };
+
+    const btnHighlightEnable = (yes) => {
+        if (yes) {
+            btnStatus([
+                {
+                    sel: '#highlight-cells-btn',
+                    act: { str: 'enable', val: true }
+                },
+                {
+                    sel: '#highlight-cells-btn',
+                    act: { str: 'display', val: true }
+                },
+                {
+                    sel: '#highlight-cells-abort-btn',
+                    act: { str: 'display', val: false }
+                }
+            ]);
+        } else {
+            btnStatus([
+                {
+                    sel: '#highlight-cells-btn',
+                    act: { str: 'display', val: false }
+                },
+                {
+                    sel: '#highlight-cells-abort-btn',
+                    act: { str: 'enable', val: true }
+                },
+                {
+                    sel: '#highlight-cells-abort-btn',
+                    act: { str: 'display', val: true }
+                },
+            ]);
+        }
+    }
 
     const updateMatrix = (_input) => {
         input = _input;
@@ -203,37 +254,78 @@ $(document).ready(() => {
     }
 
     /* NEW RANDOM MATRIX BTN */
-    $('#random-matrix-btn').on('click', function() {
-        btnChangeStatus('#random-matrix-btn', false);
-        btnChangeStatus('#clear-matrix-btn', false);
-        btnChangeStatus('#remove-cells-btn', true);
-
+    $('#random-matrix-btn').on('click', () => {
+        btnStatus([
+            {
+                sel: '#random-matrix-btn',
+                act: { str: 'enable', val: false }
+            },
+            {
+                sel: '#clear-matrix-btn',
+                act: { str: 'enable', val: false }
+            }
+        ]);
+        btnHighlightEnable(true);
         updateMatrix(matrixRandomGenerate(defaultRows, defaultColumns));
-
-        btnChangeStatus('#random-matrix-btn', true);
+        btnStatus([
+            {
+                sel: '#random-matrix-btn',
+                act: { str: 'enable', val: true }
+            }
+        ]);
     });
     /* CLEAR MATRIX BTN */
     $('#clear-matrix-btn').on('click', () => {
-        btnChangeStatus('#remove-cells-btn', true);
-        
+        btnHighlightEnable(true);
         updateMatrix(input);
-
-        btnChangeStatus('#clear-matrix-btn', false);
+        btnStatus([
+            {
+                sel: '#clear-matrix-btn',
+                act: { str: 'enable', val: false }
+            }
+        ]);
     });
     /* HIGHLIGHT CELLS BTN */
-    $('#remove-cells-btn').on('click', async function() {
-        btnChangeStatus('#remove-cells-btn', false);
-        btnChangeStatus('#random-matrix-btn', false);
-        btnChangeStatus('#enable-diagonal-search', false);
+    $('#highlight-cells-btn').on('click', async () => {
+        btnHighlightEnable(false);
+        btnStatus([
+            {
+                sel: '#random-matrix-btn',
+                act: { str: 'enable', val: false }
+            },
+            {
+                sel: '#enable-diagonal-search',
+                act: { str: 'enable', val: false }
+            }
+        ]);
         
-        await ir.run(input, matrixDrawPropagationCell, matrixDrawLinkedCell, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
+        await linkedCells.run(input, matrixDrawPropagationCell, matrixDrawLinkedCell, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
 
-        btnChangeStatus('#clear-matrix-btn', true);
-        btnChangeStatus('#random-matrix-btn', true);
-        btnChangeStatus('#enable-diagonal-search', true);
+        btnStatus([
+            {
+                sel: '#clear-matrix-btn',
+                act: { str: 'enable', val: true }
+            },
+            {
+                sel: '#random-matrix-btn',
+                act: { str: 'enable', val: true }
+            },
+            {
+                sel: '#enable-diagonal-search',
+                act: { str: 'enable', val: true }
+            },
+            {
+                sel: '#highlight-cells-abort-btn',
+                act: { str: 'enable', val: false }
+            }
+        ]);
+
+        linkedCells.ABORT = false;
     });
+    /* HIGHLIGHT CELLS ABORT BTN */
+    $('#highlight-cells-abort-btn').on('click', () => { linkedCells.ABORT = true; });
     /* SPEED SLIDER  */
-    $('#search-speed').val(4);
+    $('#search-speed').val(defaultSpeed);
     $('#search-speed').on('input', function() {
         const t = $(this);
         const v = t.val();
@@ -275,7 +367,7 @@ $(document).ready(() => {
         $('label[for="search-speed"]').text(`Speed: ${sStr}`);
     });
 
-    const ir = new LinkedCells();
+    const linkedCells = new LinkedCells();
     let input;
     updateMatrix(matrixRandomGenerate(defaultRows, defaultColumns));
 });
