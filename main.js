@@ -54,18 +54,18 @@ class LinkedCells {
     }
     // Used for recursion
     // Called when a 1 is found
-    async _keepLooking(r, c) {
+    async _keepLooking(r, c, propagationCallback, linkedCellCallback) {
         /* VISUALIZER STUFF - NOT REQUIRED */
         if (this.SPEED_DELAY > 0)
             await this.sleep(this.SPEED_DELAY);
         // Marks the filtered cell
-        drawCellClass(r, c, 'part-of-linked-cells');
+        linkedCellCallback(r, c);
         /* END VISUALIZER STUFF - NOT REQUIRED */
 
         this.addToPartOfLinkedCells(r, c);
-        await this.checkForNeighbors(r, c);
+        await this.checkForNeighbors(r, c, propagationCallback, linkedCellCallback);
     }
-    async checkForNeighbors(r, c) {
+    async checkForNeighbors(r, c, propagationCallback, linkedCellCallback) {
         const dirs = [
             {r: r - 1, c: c}, // up
             {r: r + 1, c: c}, // down
@@ -90,28 +90,24 @@ class LinkedCells {
                 this.cellAlreadyVisited.push({ r:  dirs[d].r, c: dirs[d].c});
 
             /* VISUALIZER STUFF - NOT REQUIRED */
-            drawCellClass(dirs[d].r, dirs[d].c, 'propagation');
-            setTimeout(() => {
-                drawCellClass(dirs[d].r, dirs[d].c, '-propagation');
-                drawCellClass(dirs[d].r, dirs[d].c, 'visited');
-            }, this.SPEED_DELAY + 100);
+            propagationCallback(dirs[d].r, dirs[d].c, this.SPEED_DELAY);
             /* END VISUALIZER STUFF - NOT REQUIRED */
 
             if (this.coordExists(this.partOfLinkedCells, dirs[d].r, dirs[d].c))
                 continue;
     
             if (!this.isOutsideMatrix(dirs[d].r, dirs[d].c) && this.isOne(this.matrix[dirs[d].r][dirs[d].c]))
-                await this._keepLooking(dirs[d].r, dirs[d].c);
+                await this._keepLooking(dirs[d].r, dirs[d].c, propagationCallback, linkedCellCallback);
         }
     };
 
-    async run(matrix, speed = 500, diagonalSearch = false) {
+    async run(matrix, propagationCallback, linkedCellCallback, speed = 500, diagonalSearch = false) {
         this._init(matrix, speed, diagonalSearch);
 
         for (let r = 0; r < this.mRows; r++) {
             for (let c = 0; c < this.mColumns; c++) {
                 if (LinkedCells.isBorder(r, this.mRows, c, this.mColumns) && this.isOne(this.matrix[r][c]))
-                    await this._keepLooking(r, c);
+                    await this._keepLooking(r, c, propagationCallback, linkedCellCallback);
             }
         }
 
@@ -121,7 +117,7 @@ class LinkedCells {
 
 /* *********************************************************************************************************************** */
 
-const generateRandomMatrix = (rows, columns) => {
+const matrixRandomGenerate = (rows, columns) => {
     let result = [];
 
     for (let i = 0; i < rows; i++) {
@@ -135,7 +131,7 @@ const generateRandomMatrix = (rows, columns) => {
 }
 
 
-const drawMatrix = (m, empty = 0, island = 1) => {
+const matrixDraw = (m, empty = 0, island = 1) => {
     const table = $('table');
         table.html(''); // Resets the table structure
     const rows = m.length;
@@ -151,7 +147,7 @@ const drawMatrix = (m, empty = 0, island = 1) => {
         }
     }
 }
-const drawCellClass = (row, column, _class) => {
+const matrixCellClass = (row, column, _class) => {
     const cellEl = $($($('table tr')[row]).find('td')[column]);
 
     // If the class string name starts with '-' => remove that class
@@ -159,6 +155,21 @@ const drawCellClass = (row, column, _class) => {
         cellEl.addClass(_class);
     else
         cellEl.removeClass(_class.substring(1));
+}
+const matrixDrawPropagationCell = (r, c, speed) => {
+    matrixCellClass(r, c, 'propagation');
+    if (speed == 0) {
+        matrixCellClass(r, c, '-propagation');
+        matrixCellClass(r, c, 'visited');
+    } else {
+        setTimeout(() => {
+            matrixCellClass(r, c, '-propagation');
+            matrixCellClass(r, c, 'visited');
+        }, speed + 100);
+    }
+}
+const matrixDrawLinkedCell = (r, c) => {
+    matrixCellClass(r, c, 'part-of-linked-cells');
 }
 
 $(document).ready(() => {
@@ -188,7 +199,7 @@ $(document).ready(() => {
 
     const updateMatrix = (_input) => {
         input = _input;
-        drawMatrix(input, default0Char, default1Char);
+        matrixDraw(input, default0Char, default1Char);
     }
 
     /* NEW RANDOM MATRIX BTN */
@@ -197,7 +208,7 @@ $(document).ready(() => {
         btnChangeStatus('#clear-matrix-btn', false);
         btnChangeStatus('#remove-cells-btn', true);
 
-        updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
+        updateMatrix(matrixRandomGenerate(defaultRows, defaultColumns));
 
         btnChangeStatus('#random-matrix-btn', true);
     });
@@ -215,7 +226,7 @@ $(document).ready(() => {
         btnChangeStatus('#random-matrix-btn', false);
         btnChangeStatus('#enable-diagonal-search', false);
         
-        await ir.run(input, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
+        await ir.run(input, matrixDrawPropagationCell, matrixDrawLinkedCell, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
 
         btnChangeStatus('#clear-matrix-btn', true);
         btnChangeStatus('#random-matrix-btn', true);
@@ -266,5 +277,5 @@ $(document).ready(() => {
 
     const ir = new LinkedCells();
     let input;
-    updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
+    updateMatrix(matrixRandomGenerate(defaultRows, defaultColumns));
 });
