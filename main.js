@@ -170,7 +170,7 @@ $(document).ready(() => {
         updateMatrix([[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]]);
     });
 
-    const grid = { r: Math.round($(window).height() / 45), c: Math.round($(window).width() / 60) };
+    const grid = { r: Math.round($(window).height() / 44), c: Math.round($(window).width() / 40) };
     const defaultSpeed = 500;
     const defaultRows = grid.r;
     const defaultColumns = grid.c;

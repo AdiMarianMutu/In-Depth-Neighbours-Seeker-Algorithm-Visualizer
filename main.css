@@ -12,22 +12,24 @@ body {
 
 /* TABLE RELATED */
 table {
+    table-layout: fixed !important;
+    width: 100%;
     margin-top: 16px;
     margin-bottom: 25px;
     user-select: none;
     border-collapse: collapse;
-    border-radius: 30px;
+    border-radius: 14px;
     border-style: hidden;
-    background-color: #00000021;
+    background-color: #ffffff17;
 
     overflow: hidden;
 }
 td {
-    padding: 0.1rem 1.3rem;
-    /*border: 1px solid black !important;*/
+    /*padding: 0.1rem 1.3rem;
+    border: 1px solid black !important;
     border-collapse: collapse;
-    background-clip: padding-box;
-
+    background-clip: padding-box;*/
+    text-align: center;
     transition: background-color 1s linear;
 }
 .part-of-linked-cells {
@@ -41,7 +43,7 @@ td {
     background-color: #a9ff0008;
 }
 .border-cell {
-    background-color: #00a1ff40;
+    background-color: #198754;
 }
 
 /* CONTROLS */
