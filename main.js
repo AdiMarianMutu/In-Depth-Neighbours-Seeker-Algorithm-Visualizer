@@ -65,7 +65,7 @@ class LinkedCells {
         await this.checkForNeighbors(r, c);
     }
     async checkForNeighbors(r, c) {
-        let dirs = [
+        const dirs = [
             {r: r - 1, c: c}, // up
             {r: r + 1, c: c}, // down
             {r: r, c: c + 1}, // right
@@ -79,7 +79,7 @@ class LinkedCells {
                 {r: r + 1, c: c - 1} // down-left
             );
         }
-        let dirsLen = dirs.length;
+        const dirsLen = dirs.length;
 
         for (let d = 0; d < dirsLen; d++) {
             // If a cell was alredy marked as visited, it's pointless to recalculate everything
@@ -120,7 +120,7 @@ class LinkedCells {
 
 /* *********************************************************************************************************************** */
 
-let generateRandomMatrix = (rows, columns) => {
+const generateRandomMatrix = (rows, columns) => {
     let result = [];
 
     for (let i = 0; i < rows; i++) {
@@ -134,24 +134,24 @@ let generateRandomMatrix = (rows, columns) => {
 }
 
 
-let drawMatrix = (m, empty = 0, island = 1) => {
-    let table = $('table');
+const drawMatrix = (m, empty = 0, island = 1) => {
+    const table = $('table');
         table.html(''); // Resets the table structure
-    let rows = m.length;
-    let columns = m[0].length;
+    const rows = m.length;
+    const columns = m[0].length;
 
     for (let r = 0; r < rows; r++) {
-        let _r = $('<tr>');
+        const _r = $('<tr>');
         table.append(_r);
 
         for (let c = 0; c < columns; c++) {
-            let v = m[r][c] == 0 ? empty : island;
+            const v = m[r][c] == 0 ? empty : island;
             _r.append(`<td${LinkedCells.isBorder(r, m.length, c, m[0].length) && m[r][c] == 1 ? ` class="border-cell"` : ''}>${v}</td>`);
         }
     }
 }
-let drawCellClass = (row, column, _class) => {
-    let cellEl = $($($('table tr')[row]).find('td')[column]);
+const drawCellClass = (row, column, _class) => {
+    const cellEl = $($($('table tr')[row]).find('td')[column]);
 
     // If the class string name starts with '-' => remove that class
     if (_class.substring(0, 1) != '-')
@@ -170,15 +170,14 @@ $(document).ready(() => {
         updateMatrix([[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]]);
     });
 
-    let grid = { r: Math.round($(window).height() / 45), c: Math.round($(window).width() / 60) };
-    let defaultSpeed = 500;
-    //let _rc = win;//winW <= 500 ? 6 : (winW > 500 && winW <= 1024 ? 14 : (winW > 1024 && winW <= 1200 ? 18 : 27));
-    let defaultRows = grid.r;//_rc;
-    let defaultColumns = grid.c;//_rc;
-    let default0Char = '&nbsp;'//'🌊';
-    let default1Char = 'x'//'🏝️';
+    const grid = { r: Math.round($(window).height() / 45), c: Math.round($(window).width() / 60) };
+    const defaultSpeed = 500;
+    const defaultRows = grid.r;
+    const defaultColumns = grid.c;
+    const default0Char = '&nbsp;';
+    const default1Char = 'x';
 
-    let btnChangeStatus = (btn, enable) => {
+    const btnChangeStatus = (btn, enable) => {
         let b = $(btn);
         if (enable)
             b.removeAttr('disabled');
@@ -186,7 +185,7 @@ $(document).ready(() => {
             b.attr('disabled', true);
     };
 
-    let updateMatrix = (_input) => {
+    const updateMatrix = (_input) => {
         input = _input;
         drawMatrix(input, default0Char, default1Char);
     }
@@ -221,7 +220,7 @@ $(document).ready(() => {
     
     $('#search-speed').val(defaultSpeed);
 
-    let ir = new LinkedCells();
+    const ir = new LinkedCells();
     let input;
     updateMatrix(generateRandomMatrix(defaultRows, defaultColumns));
 });
