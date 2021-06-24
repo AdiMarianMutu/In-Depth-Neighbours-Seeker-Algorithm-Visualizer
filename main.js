@@ -16,8 +16,7 @@ class LinkedCells {
         this.matrix;
         this.mRows;
         this.mColumns;
-        // This array of objects will contains the coordinates of the 1 which will not be removed from the final matrix
-        this.partOfLinkedCells;
+        // Dictionary
         this.cellAlreadyVisited;
         // The processed matrix
         // Will be initialized with 0 values
@@ -31,22 +30,13 @@ class LinkedCells {
         this.matrix = m;
         this.mRows = m.length;
         this.mColumns = m[0].length;
-        this.partOfLinkedCells = [];
-        this.cellAlreadyVisited = [];
+        this.cellAlreadyVisited = {};
         this.mProcessed = [...Array(this.mRows)].map(e => Array(this.mColumns).fill(0));
     }
     static isBorder(r, rMax, c, cMax) { return (r == 0 || r == rMax - 1) || (c == 0 || c == cMax - 1); }
     isOne(n) { return n == 1; }
     isOutsideMatrix(r, c) { return (r < 0 || r > this.mRows - 1) || (r < 0 && (c < 0 || c > this.mColumns - 1)); }
-    coordExists(dictionary, r, c) { return dictionary === undefined ? false : dictionary.some(e => e.r === r && e.c === c); }
-    addToPartOfLinkedCells(r, c) {
-        if (this.coordExists(this.partOfLinkedCells, r, c))
-            return;
-        
-        this.partOfLinkedCells.push({ r: r, c: c });
-        // Replaces the 0 with the right cell which will be part of an archipelago
-        this.mProcessed[r][c] = 1;
-    }
+    coordExists(dictionary, r, c) { return dictionary[`k${r}_${c}`] == `${r}_${c}`; }
     // Used for recursion
     // Called when a 1 is found
     async _keepLooking(r, c, propagationCallback, linkedCellCallback) {
@@ -59,8 +49,9 @@ class LinkedCells {
         // Marks the filtered cell
         linkedCellCallback(r, c);
         /* END VISUALIZER STUFF - NOT MANDATORY */
-
-        this.addToPartOfLinkedCells(r, c);
+        
+        this.mProcessed[r][c] = 1;
+        this.cellAlreadyVisited[`k${r}_${c}`] = `${r}_${c}`;
         await this.checkForNeighbors(r, c, propagationCallback, linkedCellCallback);
     }
     async checkForNeighbors(r, c, propagationCallback, linkedCellCallback) {
@@ -86,11 +77,6 @@ class LinkedCells {
         for (let d = 0; d < dirsLen; d++) {
             // If a cell was alredy marked as visited, it's pointless to recalculate everything
             if (this.coordExists(this.cellAlreadyVisited, dirs[d].r, dirs[d].c))
-                continue;
-            else
-                this.cellAlreadyVisited.push({ r:  dirs[d].r, c: dirs[d].c});
-
-            if (this.coordExists(this.partOfLinkedCells, dirs[d].r, dirs[d].c))
                 continue;
 
             /* VISUALIZER STUFF - NOT MANDATORY */
