@@ -56,7 +56,8 @@ class LinkedCells {
     // Called when a 1 is found
     async _keepLooking(r, c) {
         /* VISUALIZER STUFF - NOT REQUIRED */
-        await this.sleep(this.SPEED_DELAY);
+        if (this.SPEED_DELAY > 0)
+            await this.sleep(this.SPEED_DELAY);
         // Marks the filtered cell
         drawCellClass(r, c, 'part-of-linked-cells');
         /* END VISUALIZER STUFF - NOT REQUIRED */
@@ -93,7 +94,7 @@ class LinkedCells {
             setTimeout(() => {
                 drawCellClass(dirs[d].r, dirs[d].c, '-propagation');
                 drawCellClass(dirs[d].r, dirs[d].c, 'visited');
-            }, this.SPEED_DELAY + 350);
+            }, this.SPEED_DELAY + 100);
             /* END VISUALIZER STUFF - NOT REQUIRED */
 
             if (this.coordExists(this.partOfLinkedCells, dirs[d].r, dirs[d].c))
@@ -170,7 +171,7 @@ $(document).ready(() => {
         updateMatrix([[1,0,0,0,0,0], [0,1,0,1,1,1], [0,0,1,0,1,0], [1,1,0,0,1,0], [1,0,1,1,0,0], [1,0,0,0,0,1]]);
     });
 
-    const grid = { r: Math.round($(window).height() / 44), c: Math.round($(window).width() / 40) };
+    const grid = { r: Math.round((window.innerHeight - 235) / 28), c: Math.round(window.innerWidth / 11) };
     const defaultSpeed = 500;
     const defaultRows = grid.r;
     const defaultColumns = grid.c;
@@ -190,6 +191,7 @@ $(document).ready(() => {
         drawMatrix(input, default0Char, default1Char);
     }
 
+    /* NEW RANDOM MATRIX BTN */
     $('#random-matrix-btn').on('click', function() {
         btnChangeStatus('#random-matrix-btn', false);
         btnChangeStatus('#clear-matrix-btn', false);
@@ -199,6 +201,7 @@ $(document).ready(() => {
 
         btnChangeStatus('#random-matrix-btn', true);
     });
+    /* CLEAR MATRIX BTN */
     $('#clear-matrix-btn').on('click', () => {
         btnChangeStatus('#remove-cells-btn', true);
         
@@ -206,19 +209,60 @@ $(document).ready(() => {
 
         btnChangeStatus('#clear-matrix-btn', false);
     });
+    /* HIGHLIGHT CELLS BTN */
     $('#remove-cells-btn').on('click', async function() {
         btnChangeStatus('#remove-cells-btn', false);
         btnChangeStatus('#random-matrix-btn', false);
         btnChangeStatus('#enable-diagonal-search', false);
         
-        await ir.run(input, parseInt($('#search-speed').val()), $('#enable-diagonal-search').prop('checked'));
+        await ir.run(input, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
 
         btnChangeStatus('#clear-matrix-btn', true);
         btnChangeStatus('#random-matrix-btn', true);
         btnChangeStatus('#enable-diagonal-search', true);
     });
-    
-    $('#search-speed').val(defaultSpeed);
+    /* SPEED SLIDER  */
+    $('#search-speed').val(4);
+    $('#search-speed').on('input', function() {
+        const t = $(this);
+        const v = t.val();
+        let sInt = -1;
+        let sStr = '';
+
+        switch (true) {
+            case v == 1:
+                sStr = 'Slow Motion';
+                sInt = 60000;
+            break;
+            case v == 2:
+                sStr = 'Slowest';
+                sInt = 20000;
+            break;
+            case v == 3:
+                sStr = 'Slow';
+                sInt = 6000;
+            break;
+            case v == 4:
+                sStr = 'Normal';
+                sInt = 3500;
+            break;
+            case v == 5:
+                sStr = 'Fast';
+                sInt = 1500;
+            break;
+            case v == 6:
+                sStr = 'Super fast';
+                sInt = 100;
+            break;
+            case v == 7:
+                sStr = 'Instant';
+                sInt = 0;
+            break;
+        }
+
+        t.attr('delay-ms', sInt);
+        $('label[for="search-speed"]').text(`Speed: ${sStr}`);
+    });
 
     const ir = new LinkedCells();
     let input;
