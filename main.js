@@ -37,6 +37,7 @@ class LinkedCells {
     isOne(n) { return n == 1; }
     isOutsideMatrix(r, c) { return (r < 0 || r > this.mRows - 1) || (r < 0 && (c < 0 || c > this.mColumns - 1)); }
     coordExists(dictionary, r, c) { return dictionary[`k${r}_${c}`] == `${r}_${c}`; }
+    coordAddToVisited(r, c) { this.cellAlreadyVisited[`k${r}_${c}`] = `${r}_${c}`; }
     // Used for recursion
     // Called when a 1 is found
     async _keepLooking(r, c, propagationCallback, linkedCellCallback) {
@@ -51,7 +52,7 @@ class LinkedCells {
         /* END VISUALIZER STUFF - NOT MANDATORY */
         
         this.mProcessed[r][c] = 1;
-        this.cellAlreadyVisited[`k${r}_${c}`] = `${r}_${c}`;
+        this.coordAddToVisited(r, c);
         await this.checkForNeighbors(r, c, propagationCallback, linkedCellCallback);
     }
     async checkForNeighbors(r, c, propagationCallback, linkedCellCallback) {
@@ -78,7 +79,8 @@ class LinkedCells {
             // If a cell was alredy marked as visited, it's pointless to recalculate everything
             if (this.coordExists(this.cellAlreadyVisited, dirs[d].r, dirs[d].c))
                 continue;
-
+            
+            this.coordAddToVisited(dirs[d].r, dirs[d].c);
             /* VISUALIZER STUFF - NOT MANDATORY */
             propagationCallback(dirs[d].r, dirs[d].c, this.SPEED_DELAY);
             /* END VISUALIZER STUFF - NOT MANDATORY */
@@ -285,8 +287,9 @@ $(document).ready(() => {
             }
         ]);
         
+        console.time('linkedCells.run()');
         await linkedCells.run(input, matrixDrawPropagationCell, matrixDrawLinkedCell, parseInt($('#search-speed').attr('delay-ms')), $('#enable-diagonal-search').prop('checked'));
-
+        console.timeEnd('linkedCells.run()');
         btnStatus([
             {
                 sel: '#clear-matrix-btn',
